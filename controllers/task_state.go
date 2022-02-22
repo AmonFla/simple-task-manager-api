@@ -12,29 +12,45 @@ import (
 	"github.com/AmonFla/simple-task-manager-api/utils"
 )
 
-var st models.TaskState
+type TaskStateController struct {
+	dao   *dao.TaskStateDao
+	model models.TaskState
+}
 
-func PostTaskState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewTaskState()
+func NewTaskStateController(s *mux.Router) *TaskStateController {
+
+	controller := new(TaskStateController)
+	controller.dao = dao.NewTaskState()
+	//adding routes
+	// Project
+	s.HandleFunc("/taskstate", controller.PostTaskState).Methods("POST")
+	s.HandleFunc("/taskstate", controller.GetAllTaskState).Methods("GET")
+	s.HandleFunc("/taskstate/{ID:[0-9]+}", controller.GetTaskState).Methods("GET")
+	s.HandleFunc("/taskstate/{ID:[0-9]+}", controller.PutTaskState).Methods("PUT")
+	s.HandleFunc("/taskstate/{ID:[0-9]+}", controller.DeleteTaskState).Methods("DELETE")
+
+	return controller
+}
+
+func (st *TaskStateController) PostTaskState(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&st); err != nil {
+	if err := decoder.Decode(&st.model); err != nil {
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	defer r.Body.Close()
 
-	if err := dao.CreateTaskState(&st); err != nil {
+	if err := st.dao.CreateTaskState(&st.model); err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	utils.RespondWithJSON(w, http.StatusCreated, st)
+	utils.RespondWithJSON(w, http.StatusCreated, st.model)
 }
 
-func GetAllTaskState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewTaskState()
-	data, err := dao.GetTaskStates()
+func (st *TaskStateController) GetAllTaskState(w http.ResponseWriter, r *http.Request) {
+	data, err := st.dao.GetTaskStates()
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -43,27 +59,25 @@ func GetAllTaskState(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetTaskState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewTaskState()
+func (st *TaskStateController) GetTaskState(w http.ResponseWriter, r *http.Request) {
 	//Obtengo las variables definidas en la ruta
 	vars := mux.Vars(r)
 
-	fmt.Sscan(vars["ID"], &st.ID)
-	err := dao.GetTaskState(&st)
+	fmt.Sscan(vars["ID"], &st.model.ID)
+	err := st.dao.GetTaskState(&st.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusOK, &st)
+	utils.RespondWithJSON(w, http.StatusOK, &st.model)
 }
 
-func DeleteTaskState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewTaskState()
+func (st *TaskStateController) DeleteTaskState(w http.ResponseWriter, r *http.Request) {
 	//Obtengo las variables definidas en la ruta
 	vars := mux.Vars(r)
 
-	fmt.Sscan(vars["ID"], &st.ID)
-	err := dao.DeleteTaskState(&st)
+	fmt.Sscan(vars["ID"], &st.model.ID)
+	err := st.dao.DeleteTaskState(&st.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -71,21 +85,20 @@ func DeleteTaskState(w http.ResponseWriter, r *http.Request) {
 	utils.RespondWithMoMessage(w, http.StatusAccepted)
 }
 
-func PutTaskState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewTaskState()
+func (st *TaskStateController) PutTaskState(w http.ResponseWriter, r *http.Request) {
 	//Obtengo las variables definidas en la ruta
 	vars := mux.Vars(r)
 
-	fmt.Sscan(vars["ID"], &st.ID)
+	fmt.Sscan(vars["ID"], &st.model.ID)
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&st); err != nil {
+	if err := decoder.Decode(&st.model); err != nil {
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-	err := dao.UpdateTaskState(&st)
+	err := st.dao.UpdateTaskState(&st.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusOK, &st)
+	utils.RespondWithJSON(w, http.StatusOK, &st.model)
 }

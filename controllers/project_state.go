@@ -12,29 +12,45 @@ import (
 	"github.com/AmonFla/simple-task-manager-api/utils"
 )
 
-var pt models.ProjectState
+type ProjectStateController struct {
+	dao   *dao.ProjectStateDao
+	model models.ProjectState
+}
 
-func PostProjectState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewProjectState()
+func NewProjectStateController(s *mux.Router) *ProjectStateController {
+
+	controller := new(ProjectStateController)
+	controller.dao = dao.NewProjectState()
+	//adding routes
+	// Project
+	s.HandleFunc("/project", controller.PostProjectState).Methods("POST")
+	s.HandleFunc("/project", controller.GetAllProjectState).Methods("GET")
+	s.HandleFunc("/project/{ID:[0-9]+}", controller.GetProjectState).Methods("GET")
+	s.HandleFunc("/project/{ID:[0-9]+}", controller.PutProjectState).Methods("PUT")
+	s.HandleFunc("/project/{ID:[0-9]+}", controller.DeleteProjectState).Methods("DELETE")
+
+	return controller
+}
+
+func (pt *ProjectStateController) PostProjectState(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&pt); err != nil {
+	if err := decoder.Decode(&pt.model); err != nil {
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	defer r.Body.Close()
 
-	if err := dao.CreateProjectState(&pt); err != nil {
+	if err := pt.dao.CreateProjectState(&pt.model); err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	utils.RespondWithJSON(w, http.StatusCreated, pt)
+	utils.RespondWithJSON(w, http.StatusCreated, pt.model)
 }
 
-func GetAllProjectState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewProjectState()
-	data, err := dao.GetProjectStates()
+func (pt *ProjectStateController) GetAllProjectState(w http.ResponseWriter, r *http.Request) {
+	data, err := pt.dao.GetProjectStates()
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -43,27 +59,25 @@ func GetAllProjectState(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetProjectState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewProjectState()
+func (pt *ProjectStateController) GetProjectState(w http.ResponseWriter, r *http.Request) {
 	//Obtengo las variables definidas en la ruta
 	vars := mux.Vars(r)
 
-	fmt.Sscan(vars["ID"], &pt.ID)
-	err := dao.GetProjectState(&pt)
+	fmt.Sscan(vars["ID"], &pt.model.ID)
+	err := pt.dao.GetProjectState(&pt.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusOK, &pt)
+	utils.RespondWithJSON(w, http.StatusOK, &pt.model)
 }
 
-func DeleteProjectState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewProjectState()
+func (pt *ProjectStateController) DeleteProjectState(w http.ResponseWriter, r *http.Request) {
 	//Obtengo las variables definidas en la ruta
 	vars := mux.Vars(r)
 
-	fmt.Sscan(vars["ID"], &pt.ID)
-	err := dao.DeleteProjectState(&pt)
+	fmt.Sscan(vars["ID"], &pt.model.ID)
+	err := pt.dao.DeleteProjectState(&pt.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -71,21 +85,20 @@ func DeleteProjectState(w http.ResponseWriter, r *http.Request) {
 	utils.RespondWithMoMessage(w, http.StatusAccepted)
 }
 
-func PutProjectState(w http.ResponseWriter, r *http.Request) {
-	dao := dao.NewProjectState()
+func (pt *ProjectStateController) PutProjectState(w http.ResponseWriter, r *http.Request) {
 	//Obtengo las variables definidas en la ruta
 	vars := mux.Vars(r)
 
-	fmt.Sscan(vars["ID"], &pt.ID)
+	fmt.Sscan(vars["ID"], &pt.model.ID)
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&pt); err != nil {
+	if err := decoder.Decode(&pt.model); err != nil {
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-	err := dao.UpdateProjectState(&pt)
+	err := pt.dao.UpdateProjectState(&pt.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.RespondWithJSON(w, http.StatusOK, &pt)
+	utils.RespondWithJSON(w, http.StatusOK, &pt.model)
 }
