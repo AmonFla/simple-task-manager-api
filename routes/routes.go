@@ -16,4 +16,6 @@ func AddRoutes(s *mux.Router) {
 	controllers.NewProjectController(s)
 	//Task
 	controllers.NewTaskController(s)
+	//Note
+	controllers.NewNoteController(s)
 }
