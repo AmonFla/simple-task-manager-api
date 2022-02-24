@@ -23,11 +23,11 @@ func NewTaskStateController(s *mux.Router) *TaskStateController {
 	controller.dao = dao.NewTaskState()
 	//adding routes
 	// Project
-	s.HandleFunc("/taskstate", controller.PostTaskState).Methods("POST")
-	s.HandleFunc("/taskstate", controller.GetAllTaskState).Methods("GET")
-	s.HandleFunc("/taskstate/{ID:[0-9]+}", controller.GetTaskState).Methods("GET")
-	s.HandleFunc("/taskstate/{ID:[0-9]+}", controller.PutTaskState).Methods("PUT")
-	s.HandleFunc("/taskstate/{ID:[0-9]+}", controller.DeleteTaskState).Methods("DELETE")
+	s.HandleFunc("/task/state", controller.PostTaskState).Methods("POST")
+	s.HandleFunc("/task/state", controller.GetAllTaskState).Methods("GET")
+	s.HandleFunc("/task/state/{ID:[0-9]+}", controller.GetTaskState).Methods("GET")
+	s.HandleFunc("/task/state/{ID:[0-9]+}", controller.PutTaskState).Methods("PUT")
+	s.HandleFunc("/task/state/{ID:[0-9]+}", controller.DeleteTaskState).Methods("DELETE")
 
 	return controller
 }

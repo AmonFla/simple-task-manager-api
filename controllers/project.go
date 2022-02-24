@@ -28,6 +28,10 @@ func NewProjectController(s *mux.Router) *ProjectController {
 	s.HandleFunc("/project/{ID:[0-9]+}", controller.GetProject).Methods("GET")
 	s.HandleFunc("/project/{ID:[0-9]+}", controller.PutProject).Methods("PUT")
 	s.HandleFunc("/project/{ID:[0-9]+}", controller.DeleteProject).Methods("DELETE")
+	s.HandleFunc("/project/{ID:[0-9]+}/users", controller.AddUserToProject).Methods("POST")
+	s.HandleFunc("/project/{ID:[0-9]+}/users/{user:[0-9]+}", controller.DeleteUserFromProject).Methods("DELETE")
+	s.HandleFunc("/project/{ID:[0-9]+}/users/{user:[0-9]+}/active", controller.ActiveUserFromProject).Methods("PUT")
+	s.HandleFunc("/project/{ID:[0-9]+}/state/{state:[0-9]+}", controller.AddStateToProject).Methods("PUT")
 
 	return controller
 }
@@ -100,5 +104,64 @@ func (pr *ProjectController) PutProject(w http.ResponseWriter, r *http.Request) 
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	pr.dao.GetProject(&pr.model)
+	utils.RespondWithJSON(w, http.StatusOK, &pr.model)
+}
+
+func (pr *ProjectController) AddUserToProject(w http.ResponseWriter, r *http.Request) {
+	//Obtengo las variables definidas en la ruta
+	vars := mux.Vars(r)
+
+	fmt.Sscan(vars["ID"], &pr.model.ID)
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&pr.model); err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	err := pr.dao.AddUserToProject(&pr.model)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	pr.dao.GetProject(&pr.model)
+	utils.RespondWithJSON(w, http.StatusOK, &pr.model)
+}
+
+func (pr *ProjectController) DeleteUserFromProject(w http.ResponseWriter, r *http.Request) {
+	//Obtengo las variables definidas en la ruta
+	vars := mux.Vars(r)
+	err := pr.dao.DeleteUserFromProject(vars["ID"], vars["user"])
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	fmt.Sscan(vars["ID"], &pr.model.ID)
+	pr.dao.GetProject(&pr.model)
+	utils.RespondWithJSON(w, http.StatusOK, &pr.model)
+}
+
+func (pr *ProjectController) ActiveUserFromProject(w http.ResponseWriter, r *http.Request) {
+	//Obtengo las variables definidas en la ruta
+	vars := mux.Vars(r)
+	err := pr.dao.ActiveUserFromProject(vars["ID"], vars["user"])
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	fmt.Sscan(vars["ID"], &pr.model.ID)
+	pr.dao.GetProject(&pr.model)
+	utils.RespondWithJSON(w, http.StatusOK, &pr.model)
+}
+
+func (pr *ProjectController) AddStateToProject(w http.ResponseWriter, r *http.Request) {
+	//Obtengo las variables definidas en la ruta
+	vars := mux.Vars(r)
+	err := pr.dao.AddStateToProject(vars["ID"], vars["state"])
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	fmt.Sscan(vars["ID"], &pr.model.ID)
+	pr.dao.GetProject(&pr.model)
 	utils.RespondWithJSON(w, http.StatusOK, &pr.model)
 }

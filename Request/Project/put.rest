@@ -1,4 +1,6 @@
 PUT http://127.0.0.1:5000/api/projectstate/1
 Content-Type: application/json
 
-{"name":"Updated"}
+{ "name":"New", 
+  "description":"1234"
+  }

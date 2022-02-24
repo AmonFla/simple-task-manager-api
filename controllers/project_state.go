@@ -23,11 +23,11 @@ func NewProjectStateController(s *mux.Router) *ProjectStateController {
 	controller.dao = dao.NewProjectState()
 	//adding routes
 	// Project
-	s.HandleFunc("/project", controller.PostProjectState).Methods("POST")
-	s.HandleFunc("/project", controller.GetAllProjectState).Methods("GET")
-	s.HandleFunc("/project/{ID:[0-9]+}", controller.GetProjectState).Methods("GET")
-	s.HandleFunc("/project/{ID:[0-9]+}", controller.PutProjectState).Methods("PUT")
-	s.HandleFunc("/project/{ID:[0-9]+}", controller.DeleteProjectState).Methods("DELETE")
+	s.HandleFunc("/project/state", controller.PostProjectState).Methods("POST")
+	s.HandleFunc("/project/state", controller.GetAllProjectState).Methods("GET")
+	s.HandleFunc("/project/state/{ID:[0-9]+}", controller.GetProjectState).Methods("GET")
+	s.HandleFunc("/project/state/{ID:[0-9]+}", controller.PutProjectState).Methods("PUT")
+	s.HandleFunc("/project/state/{ID:[0-9]+}", controller.DeleteProjectState).Methods("DELETE")
 
 	return controller
 }

@@ -1,4 +1,4 @@
-POST http://127.0.0.1:5000/api/projectstate
+POST http://127.0.0.1:5000/api/project/state
 Content-Type: application/json
 
-{"name":"New"}
+{"name":"In Progress"}
