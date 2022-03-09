@@ -18,3 +18,4 @@ In the folder request you have examples of each endpoints
 * Validate that states and user informed for project and task 
 * Implement SWAGGER for api documentation
 * Add Test 
+* Modify Get Methods of task and project to deliver more information.
