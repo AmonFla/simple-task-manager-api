@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -44,7 +45,7 @@ func (pr *ProjectController) PostProject(w http.ResponseWriter, r *http.Request)
 	}
 
 	defer r.Body.Close()
-
+	pr.model.CreatedAt = time.Now()
 	if err := pr.dao.CreateProject(&pr.model); err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -99,6 +100,7 @@ func (pr *ProjectController) PutProject(w http.ResponseWriter, r *http.Request) 
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+	pr.model.UpdatedAt = time.Now()
 	err := pr.dao.UpdateProject(&pr.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())

@@ -1,4 +1,4 @@
 POST http://127.0.0.1:5000/api/task
 Content-Type: application/json
 
-{"name":"New"}
+{"title":"New","description":"loremipsu", "project_id":"2","user_id":"1" }

@@ -23,8 +23,8 @@ func (dao *TaskDao) GetTask(tsk *models.Task) error {
 }
 
 func (dao *TaskDao) UpdateTask(tsk *models.Task) error {
-	_, err := dao.DB.Exec("UPDATE Task SET title=$1, description=$2, project_id=$3, user_id=$4, created_at=$5, updated_at=$6 WHERE id=$7",
-		tsk.Title, tsk.Description, tsk.ProjectId, tsk.UserId, tsk.CreatedAt, tsk.UpdatedAt, tsk.ID)
+	_, err := dao.DB.Exec("UPDATE Task SET title=$1, description=$2, project_id=$3, user_id=$4,  updated_at=$5 WHERE id=$6",
+		tsk.Title, tsk.Description, tsk.ProjectId, tsk.UserId, tsk.UpdatedAt, tsk.ID)
 	return err
 }
 
@@ -65,4 +65,14 @@ func (dao *TaskDao) GetTasks() ([]models.Task, error) {
 	}
 
 	return states, nil
+}
+
+func (dao *TaskDao) AddStateToTask(ID string, state string) error {
+
+	_, err := dao.DB.Exec("INSERT INTO task_task_state (state_id, task_id, user_id) VALUES($1,$2,$3)", ID, state, 1)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

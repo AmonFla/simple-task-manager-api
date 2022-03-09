@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -40,7 +41,7 @@ func (note *NoteController) PostNote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
-
+	note.model.CreatedAt = time.Now()
 	if err := note.dao.CreateNote(&note.model); err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return

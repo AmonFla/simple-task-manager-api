@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -28,6 +29,7 @@ func NewTaskController(s *mux.Router) *TaskController {
 	s.HandleFunc("/task/{ID:[0-9]+}", controller.GetTask).Methods("GET")
 	s.HandleFunc("/task/{ID:[0-9]+}", controller.PutTask).Methods("PUT")
 	s.HandleFunc("/task/{ID:[0-9]+}", controller.DeleteTask).Methods("DELETE")
+	s.HandleFunc("/task/{ID:[0-9]+}/state/{state:[0-9]+}", controller.AddStateToTask).Methods("PUT")
 
 	return controller
 }
@@ -40,7 +42,7 @@ func (tr *TaskController) PostTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
-
+	tr.model.CreatedAt = time.Now()
 	if err := tr.dao.CreateTask(&tr.model); err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -95,10 +97,25 @@ func (tr *TaskController) PutTask(w http.ResponseWriter, r *http.Request) {
 		utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+	tr.model.UpdatedAt = time.Now()
 	err := tr.dao.UpdateTask(&tr.model)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	tr.dao.GetTask(&tr.model)
+	utils.RespondWithJSON(w, http.StatusOK, &tr.model)
+}
+
+func (tr *TaskController) AddStateToTask(w http.ResponseWriter, r *http.Request) {
+	//Obtengo las variables definidas en la ruta
+	vars := mux.Vars(r)
+	err := tr.dao.AddStateToTask(vars["ID"], vars["state"])
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	fmt.Sscan(vars["ID"], &tr.model.ID)
+	tr.dao.GetTask(&tr.model)
 	utils.RespondWithJSON(w, http.StatusOK, &tr.model)
 }
