@@ -42,6 +42,14 @@ func (dao *TaskDao) CreateTask(tsk *models.Task) error {
 		return err
 	}
 
+	if tsk.States.ID > 0 {
+		_, err = dao.DB.Exec("INSERT INTO task_task_state (state_id, task_id, user_id) VALUES($1,$2,$3)", tsk.States.ID, tsk.ID, 1)
+	}
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
